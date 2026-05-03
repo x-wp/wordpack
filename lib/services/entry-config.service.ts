@@ -2,8 +2,12 @@ import { Configuration } from 'webpack';
 import { BundleConfig, WordPackConfig } from '../config';
 import merge from 'webpack-merge';
 import WebpackBarPlugin from 'webpackbar';
-import camelcase from 'camelcase';
 import { Colorizer } from './colorizer.service';
+
+const toCamel = (s: string): string =>
+  s.replace(/[-_\s.]+(.)?/g, (_, c: string | undefined) =>
+    c ? c.toUpperCase() : '',
+  );
 
 export class EntryConfig {
   static build(cfg: WordPackConfig, bundle: BundleConfig): Configuration {
@@ -38,7 +42,7 @@ export class EntryConfig {
     return {
       plugins: [
         new WebpackBarPlugin({
-          name: camelcase(bundle.name),
+          name: toCamel(bundle.name),
           fancy: !cfg.isCI,
           basic: cfg.isCI,
           color: bundle.color || Colorizer.stringToColor(bundle.name),
