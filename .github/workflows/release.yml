@@ -39,6 +39,8 @@ jobs:
           node-version: lts/*
       - run: npm clean-install
       - run: npm audit signatures
+      - name: Test
+        run: npm test
       - name: Build
         run: npm run build
       - name: Publish NPM package

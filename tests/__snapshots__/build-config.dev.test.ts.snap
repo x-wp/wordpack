@@ -1,0 +1,215 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`buildConfig — development > matches snapshot 1`] = `
+[
+  {
+    "cache": {
+      "buildDependencies": {
+        "config": [
+          "<FIXTURE>/wpwp.config.ts",
+        ],
+      },
+      "type": "filesystem",
+    },
+    "context": "<FIXTURE>/assets",
+    "devtool": false,
+    "entry": {
+      "cte": [
+        "./styles/admin/cte.scss",
+      ],
+      "list-page": [
+        "./styles/admin/list-page.scss",
+        "./scripts/admin/list-page.ts",
+      ],
+      "metabox": [
+        "./styles/admin/metabox.scss",
+      ],
+    },
+    "externals": [
+      {
+        "backbone": "backbone",
+        "jquery": "jQuery",
+        "lodash": "_",
+        "underscore": "_",
+      },
+    ],
+    "externalsType": "window",
+    "mode": "development",
+    "module": {
+      "rules": [
+        {
+          "exclude": [
+            "[RegExp: node_modules(?![/|\\\\](bootstrap|foundation-sites))]",
+          ],
+          "include": [
+            "<FIXTURE>/assets/scripts",
+          ],
+          "test": "[RegExp: \\.[tj]sx?$]",
+          "use": {
+            "loader": "swc-loader",
+            "options": {
+              "env": {
+                "coreJs": "3.38",
+                "mode": "usage",
+                "targets": "<REDACTED:targets>",
+              },
+              "jsc": {
+                "parser": {
+                  "decorators": true,
+                  "syntax": "typescript",
+                  "tsx": true,
+                },
+                "transform": {
+                  "decoratorMetadata": true,
+                  "legacyDecorator": true,
+                },
+              },
+            },
+          },
+        },
+        {
+          "include": "<FIXTURE>/assets/styles",
+          "test": "[RegExp: \\.(sa|sc|c)ss$/i]",
+          "use": [
+            {
+              "loader": "<REPO>/node_modules/mini-css-extract-plugin/dist/loader.js",
+            },
+            {
+              "loader": "css-loader",
+              "options": {
+                "importLoaders": 1,
+                "sourceMap": true,
+              },
+            },
+            {
+              "loader": "postcss-loader",
+              "options": {
+                "postcssOptions": {
+                  "plugins": [
+                    "postcss-preset-env",
+                  ],
+                },
+                "sourceMap": true,
+              },
+            },
+            {
+              "loader": "resolve-url-loader",
+              "options": {
+                "sourceMap": true,
+              },
+            },
+            {
+              "loader": "sass-loader",
+              "options": {
+                "api": "modern-compiler",
+                "sassOptions": {
+                  "outputStyle": "expanded",
+                  "quietDeps": true,
+                },
+                "sourceMap": true,
+              },
+            },
+          ],
+        },
+        {
+          "generator": {
+            "filename": "images/[name][ext]",
+          },
+          "test": "[RegExp: \\.(png|svg|jpg|jpeg|gif|ico|avif)$/i]",
+          "type": "asset/resource",
+        },
+        {
+          "generator": {
+            "filename": "fonts/[name][ext]",
+          },
+          "test": "[RegExp: \\.(ttf|otf|eot|woff2?)$]",
+          "type": "asset/resource",
+        },
+      ],
+    },
+    "name": "admin",
+    "optimization": {
+      "moduleIds": "deterministic",
+      "removeEmptyChunks": true,
+      "splitChunks": {
+        "cacheGroups": {
+          "default": false,
+          "defaultVendors": false,
+          "vendor": {
+            "chunks": "all",
+            "filename": "[Function: filename]",
+            "minChunks": 1,
+            "minSize": 100,
+            "name": "[Function: name]",
+            "priority": 10,
+            "reuseExistingChunk": true,
+            "test": "[RegExp: [\\\\/]node_modules[\\\\/]]",
+          },
+        },
+        "hidePathInfo": true,
+      },
+    },
+    "output": {
+      "filename": "js/admin/[name].js",
+      "path": "<FIXTURE>/dist",
+      "publicPath": "",
+    },
+    "plugins": [
+      {
+        "__plugin": "FriendlyErrorsWebpackPlugin",
+      },
+      {
+        "__plugin": "WebpackAssetsManifest",
+      },
+      {
+        "__plugin": "WebpackBarPlugin",
+      },
+      {
+        "__plugin": "MiniCssExtractPlugin",
+      },
+      {
+        "__plugin": "CssUrlRelativePlugin",
+      },
+      {
+        "__plugin": "WebpackRemoveEmptyScriptsPlugin",
+      },
+    ],
+    "resolve": {
+      "extensions": [
+        ".tsx",
+        ".ts",
+        ".jsx",
+        ".js",
+        ".scss",
+        ".css",
+      ],
+    },
+    "stats": false,
+    "target": "web",
+  },
+  {
+    "context": "<FIXTURE>/assets",
+    "dependencies": [
+      "admin",
+    ],
+    "entry": {},
+    "mode": "development",
+    "name": "AssetCopy",
+    "output": {
+      "path": "<FIXTURE>/dist",
+    },
+    "plugins": [
+      {
+        "__plugin": "CopyPlugin",
+      },
+      {
+        "__plugin": "WebpackBarPlugin",
+      },
+      {
+        "__plugin": "WebpackAssetsManifest",
+      },
+    ],
+    "stats": false,
+  },
+]
+`;
