@@ -30,11 +30,6 @@ export class BundleConfig {
   @ValidateIf((o: BundleConfig) => o.splitChunks === true)
   chunkTest: RegExp = /[\\/]node_modules[\\/]/;
 
-  @IsString()
-  @ValidateIf((o: BundleConfig) => o.splitChunks === true)
-  @IsOptional()
-  chunkId: string = 'vendor-[name]';
-
   @Min(10)
   @IsPositive()
   @IsInt()
@@ -55,10 +50,6 @@ export class BundleConfig {
 
   hasScripts(): boolean {
     return this.files.some((f) => f.match(/(\.[tj]sx?)$/i));
-  }
-
-  get chunkName(): string {
-    return this.chunkId.replace('[name]', this.name);
   }
 
   get entry(): Record<string, string[]> {

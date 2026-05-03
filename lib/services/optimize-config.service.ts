@@ -51,7 +51,7 @@ export class OptimizeConfig {
   }
 
   static chunkFilename(cfg: WordPackConfig): string {
-    return `${cfg.scripts('dist')}/[name].js`;
+    return `${cfg.scripts('dist')}/[name].[contenthash:6].js`;
   }
 
   private static getChunkConfig(

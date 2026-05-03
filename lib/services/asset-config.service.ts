@@ -1,6 +1,6 @@
 import { Configuration } from 'webpack';
 import { WordPackConfig } from '../config';
-import * as fs from 'fs-extra';
+import { existsSync } from 'node:fs';
 import CopyPlugin from 'copy-webpack-plugin';
 import merge from 'webpack-merge';
 import { OptimizeConfig } from './optimize-config.service';
@@ -51,7 +51,7 @@ export class AssetConfig {
   }
 
   static filterAssets(cfg: WordPackConfig, rp: string): boolean {
-    return !fs.existsSync(
+    return !existsSync(
       rp
         .replace(cfg.root('src'), cfg.root('dist'))
         .replace(cfg.images('src'), cfg.images('dist')),

@@ -7,11 +7,9 @@ import {
 } from 'webpack';
 import { Transform, Type } from 'class-transformer';
 import {
-  IsBoolean,
   IsEnum,
   IsNotEmpty,
   IsObject,
-  IsOptional,
   IsString,
   ValidateNested,
 } from 'class-validator';
@@ -75,18 +73,7 @@ export class WordPackConfig extends WordPackEnv {
       backbone: 'backbone',
       lodash: '_',
     },
-    // function ({ context, request }, callback) {
-    //   if (/^lodash/.test(request as string)) {
-    //     callback(null, 'window _');
-    //     return;
-    //   }
-    //   callback();
-    // },
   ];
-
-  @IsBoolean()
-  @IsOptional()
-  multimode: boolean = true;
 
   @IsObject()
   @ValidateNested()
@@ -104,9 +91,6 @@ export class WordPackConfig extends WordPackEnv {
     false,
   ])
   sourceMaps: string | false = 'eval-cheap-source-map';
-
-  @IsString({ each: true })
-  globalChunks: string[] = ['awesome-notifications'];
 
   @IsObject()
   override: Partial<Configuration> = {};

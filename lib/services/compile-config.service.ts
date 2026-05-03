@@ -58,7 +58,7 @@ export class CompileConfig {
         ],
       },
       resolve: {
-        extensions: ['jsx', '.tsx', '.ts', '.js'],
+        extensions: ['.tsx', '.ts', '.jsx', '.js'],
       },
     };
   }
@@ -72,9 +72,6 @@ export class CompileConfig {
     }
 
     return {
-      // output: {
-      // cssFilename: `${cfg.styles('dist')}/${bundle.name}/${cfg.asset}.css`,
-      // },
       module: {
         rules: [
           {

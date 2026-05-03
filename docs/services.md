@@ -177,15 +177,12 @@ Source: [`lib/services/compile-config.service.ts:9-170`](../lib/services/compile
          },
        },
      }]},
-     resolve: { extensions: ['jsx', '.tsx', '.ts', '.js'] },
+     resolve: { extensions: ['.tsx', '.ts', '.jsx', '.js'] },
    }
    ```
    `bootstrap` and `foundation-sites` are whitelisted from the
    `node_modules` exclusion so their SCSS mixins / JS helpers can be
    transpiled alongside project code.
-
-   The `'jsx'` entry in `resolve.extensions` is missing a leading dot; see
-   [open-questions.md](./open-questions.md#resolve-extensions-jsx).
 
 2. **`getCssConfig(cfg, bundle)`** — returns `{}` if `!bundle.hasStyles()`.
    Otherwise defines three rules plus two plugins:

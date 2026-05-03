@@ -1,7 +1,6 @@
 import WebpackAssetsManifest, { Entry } from 'webpack-assets-manifest';
 import * as path from 'node:path';
-import * as fs from 'fs-extra';
-import { Asset } from 'webpack';
+import { writeFileSync } from 'node:fs';
 
 export function manifestEntryFormatter({ key, value }: Entry): Entry | false {
   key = `${path.dirname(value)}/${path.basename(key)}`;
@@ -30,7 +29,7 @@ return array(
 
   const content = tmpl.replace('{{{entries}}}', entries.join('\n'));
 
-  fs.writeFileSync(mfs.getOutputPath().replace('.json', '.php'), content);
+  writeFileSync(mfs.getOutputPath().replace('.json', '.php'), content);
 }
 
 function findLongest(entries: string[]): number {

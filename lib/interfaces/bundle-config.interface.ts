@@ -5,10 +5,7 @@ export interface BundleConfigInterface {
   files: string[];
   splitChunks?: boolean;
   chunkTest?: RegExp;
-  chunkName?: string;
   chunkMinSize?: number;
-  globalChunks?: string[];
   override?: Partial<Configuration>;
   color?: string;
-  entry?: Record<string, string[]>;
 }

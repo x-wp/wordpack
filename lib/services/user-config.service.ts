@@ -1,6 +1,6 @@
 import { WordPackConfig, WordPackEnv } from '../config';
 import * as path from 'node:path';
-import * as fs from 'fs-extra';
+import { existsSync } from 'node:fs';
 import { transformAndValidateSync } from 'class-transformer-validator';
 import { WebpackError } from 'webpack';
 import { instanceToPlain } from 'class-transformer';
@@ -17,7 +17,7 @@ export class UserConfig {
     cfgPath: string,
     env: WordPackEnv,
   ): Promise<WordPackConfig> {
-    cfgPath = fs.existsSync(path.posix.resolve(env.base, cfgPath))
+    cfgPath = existsSync(path.posix.resolve(env.base, cfgPath))
       ? path.posix.resolve(env.base, cfgPath)
       : UserConfig.findFile(env.base, cfgPath);
 
@@ -33,7 +33,7 @@ export class UserConfig {
   private static findFile(rootDir: string, cfgPath: string): string {
     const cfgName = path.posix.basename(cfgPath);
     const cfgLocs = this.possiblePaths(rootDir, cfgName);
-    const cfgFile = cfgLocs.find((p) => fs.existsSync(p));
+    const cfgFile = cfgLocs.find((p) => existsSync(p));
 
     if (!cfgFile) {
       throw new WebpackError(`Cannot find configuration file ${cfgName}`);
@@ -67,7 +67,13 @@ export class UserConfig {
         configObj,
       ) as WordPackConfig;
     } catch (e) {
-      throw new WebpackError(`Error parsing configuration file ${cfgPath}`);
+      const detail =
+        e instanceof Error
+          ? e.stack ?? e.message
+          : JSON.stringify(e, null, 2);
+      throw new WebpackError(
+        `Error parsing configuration file ${cfgPath}:\n${detail}`,
+      );
     }
   }
 }

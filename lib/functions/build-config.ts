@@ -1,6 +1,6 @@
 import { Configuration } from 'webpack';
 import { merge } from 'webpack-merge';
-import * as fs from 'fs-extra';
+import { mkdirSync, rmSync } from 'node:fs';
 import * as Svc from '../services';
 import { WordPackEnv } from '../config';
 
@@ -27,12 +27,11 @@ export async function buildConfig(
       ),
     );
 
-    // console.log(res);
-    // process.exit(0);
-
     res.push(Svc.AssetConfig.build(cfg));
 
-    fs.emptyDirSync(cfg.path('dist', 'root'));
+    const distDir = cfg.path('dist', 'root');
+    rmSync(distDir, { recursive: true, force: true });
+    mkdirSync(distDir, { recursive: true });
 
     return res;
   } catch (e) {

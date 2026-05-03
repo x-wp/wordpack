@@ -160,7 +160,9 @@ minified on the way through.
 ## Step 5 — Synchronous dist wipe
 
 ```ts
-fs.emptyDirSync(cfg.path('dist', 'root'));
+const distDir = cfg.path('dist', 'root');
+rmSync(distDir, { recursive: true, force: true });
+mkdirSync(distDir, { recursive: true });
 ```
 
 This runs *inside* `buildConfig`, before `return res`. Implications:

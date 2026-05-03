@@ -57,13 +57,6 @@ themselves.
 | `imageMin` | `Partial<SharpEncodeOptions>` | `{}` | `@IsObject()` | Merged on top of the defaults in `OptimizeConfig.getImageMinimizers`. |
 | `override` | `Partial<Configuration>` | `{}` | `@IsObject()` | Extra webpack config merged into *every* bundle (last before per-bundle override). |
 
-### Advanced / less common
-
-| Field | Type | Default | Notes |
-|-------|------|---------|-------|
-| `globalChunks` | `string[]` | `['awesome-notifications']` | Not currently consumed by any service — see [open-questions.md](./open-questions.md). |
-| `multimode` | `boolean` | `true` | Not currently consumed — see [open-questions.md](./open-questions.md). |
-
 ### Helper methods
 
 The loaded config exposes path helpers used throughout the services:
@@ -118,7 +111,6 @@ Source: [`lib/config/bundle.config.ts:17-76`](../lib/config/bundle.config.ts).
 | `chunkMinSize` | `number` | `5000` | `@Min(10)`, `@IsPositive()`, `@IsInt()`, validated only if `splitChunks` | `cacheGroups.vendor.minSize`. The test fixture sets `100` to force splitting of small bundles. |
 | `color` | `string?` | — | `@IsHexColor()`, `@IsOptional()` | Overrides the deterministic `Colorizer.stringToColor` pick. |
 | `override` | `Partial<Configuration>` | `{}` | `@IsObject()`, `@IsOptional()` | Merged last, after global `cfg.override`. |
-| `chunkId` | `string` | `'vendor-[name]'` | — | Computed getter `chunkName` substitutes `[name]` with the bundle name. Currently not consumed by any service — see [open-questions.md](./open-questions.md). |
 
 Helper methods:
 
@@ -132,16 +124,15 @@ Helper methods:
 
 ## Interfaces (user-facing shapes)
 
-`lib/interfaces/*.ts` expose TypeScript interfaces that are a *superset*, not
-an exact mirror, of the classes above:
+`lib/interfaces/*.ts` expose TypeScript interfaces that mirror the inputs
+each class accepts:
 
 - `WordPackEnvInterface` — all fields optional.
 - `WordPackConfigInterface` — `bundles` required; most others optional. A
   simplified `externals?: Record<string, string>` (instead of the full
   webpack union).
-- `BundleConfigInterface` — includes extra optional fields (`chunkName`,
-  `globalChunks`, `entry`) that the class either computes as getters or
-  doesn't expose at all. See [open-questions.md](./open-questions.md#bundle-config-interface-drift).
+- `BundleConfigInterface` — `name` and `files` required; everything else
+  optional.
 
 The default export of `@x-wp/wordpack` (`buildConfig`) is the function, and
 the `WordPackConfig` / `BundleConfig` names re-exported from `lib/index.ts`

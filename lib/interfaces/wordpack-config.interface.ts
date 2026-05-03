@@ -9,8 +9,7 @@ export interface WordPackConfigInterface {
   imagename?: string;
   fontname?: string;
   bundles: BundleConfigInterface[];
-  multimode?: boolean;
   externals?: Record<string, string>;
   sourceMaps?: string | false;
-  imageMin: Partial<SharpEncodeOptions>;
+  imageMin?: Partial<SharpEncodeOptions>;
 }

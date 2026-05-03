@@ -92,7 +92,7 @@ consumer sets.
 │       └─ name: 'AssetCopy', dependencies: [all bundle names],         │
 │          copies images.src → images.dist, writes manifest to disk     │
 │                                                                       │
-│  5. fs.emptyDirSync(cfg.path('dist', 'root'))                         │
+│  5. rmSync + mkdirSync on cfg.path('dist', 'root')                    │
 │       ── synchronous side effect, before webpack runs ──              │
 │                                                                       │
 │  6. return Configuration[]                                            │
