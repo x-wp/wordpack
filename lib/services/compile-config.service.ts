@@ -1,5 +1,6 @@
 import { Configuration, PathData } from 'webpack';
 import merge from 'webpack-merge';
+import browserslist from 'browserslist';
 import { BundleConfig, WordPackConfig } from '../config';
 import WebpackRemoveEmptyScriptsPlugin from 'webpack-remove-empty-scripts';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
@@ -36,6 +37,11 @@ export class CompileConfig {
             use: {
               loader: 'swc-loader',
               options: {
+                env: {
+                  mode: 'usage',
+                  coreJs: '3.38',
+                  targets: this.resolveBrowserTargets(cfg),
+                },
                 jsc: {
                   parser: {
                     syntax: 'typescript',
@@ -46,7 +52,6 @@ export class CompileConfig {
                     legacyDecorator: true,
                     decoratorMetadata: true,
                   },
-                  target: 'es2017',
                 },
               },
             },
@@ -57,6 +62,13 @@ export class CompileConfig {
         extensions: ['.tsx', '.ts', '.jsx', '.js'],
       },
     };
+  }
+
+  // SWC's env reads browserslist from process.cwd(), which is wrong for
+  // multi-project setups. Resolve from the consumer's source root so the
+  // .browserslistrc next to wpwp.config.ts is what drives polyfills.
+  private static resolveBrowserTargets(cfg: WordPackConfig): string[] {
+    return browserslist(undefined, { path: cfg.path('src', 'root') });
   }
 
   private static getCssConfig(

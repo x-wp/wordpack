@@ -137,9 +137,11 @@ true }` so npm receives provenance metadata.
 - `optionalDependencies`: `sass-embedded: ^1.79` — faster SASS compiler;
   `sass` picks it up automatically when installed.
 - Production deps include the full loader / plugin stack: `swc-loader`
-  + `@swc/core`, `css-loader`, `postcss-loader`, `sass-loader`,
-  `mini-css-extract-plugin`, `terser-webpack-plugin` (using
-  `TerserPlugin.swcMinify`), `css-minimizer-webpack-plugin`,
+  + `@swc/core` (with `core-js@3.38` for env-mode polyfill injection
+  and `browserslist` for resolving the consumer's browser targets
+  from their source root), `css-loader`, `postcss-loader`,
+  `sass-loader`, `mini-css-extract-plugin`, `terser-webpack-plugin`
+  (using `TerserPlugin.swcMinify`), `css-minimizer-webpack-plugin`,
   `image-minimizer-webpack-plugin`, `copy-webpack-plugin`,
   `webpack-remove-empty-scripts`, `css-url-relative-plugin`,
   `webpack-assets-manifest`, `webpackbar`, `@x-wp/friendly-errors-webpack-plugin`.

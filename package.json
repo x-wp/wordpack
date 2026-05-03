@@ -42,11 +42,13 @@
   "dependencies": {
     "@swc/core": "^1.15.33",
     "@x-wp/friendly-errors-webpack-plugin": "^2.1.0",
+    "browserslist": "^4.28.2",
     "camelcase": "^6",
     "class-transformer": "^0.5.1",
     "class-transformer-validator": "^0.9.1",
     "class-validator": "^0.14.1",
     "copy-webpack-plugin": "^12.0.2",
+    "core-js": "^3.49.0",
     "css-loader": "^7.1",
     "css-minimizer-webpack-plugin": "^7.0.0",
     "css-url-relative-plugin": "^1.1.0",

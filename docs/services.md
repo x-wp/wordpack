@@ -174,10 +174,14 @@ Source: [`lib/services/compile-config.service.ts:9-170`](../lib/services/compile
        use: {
          loader: 'swc-loader',
          options: {
+           env: {
+             mode: 'usage',
+             coreJs: '3.38',
+             targets: resolveBrowserTargets(cfg),  // browserslist
+           },
            jsc: {
              parser: { syntax: 'typescript', tsx: true, decorators: true },
              transform: { legacyDecorator: true, decoratorMetadata: true },
-             target: 'es2017',
            },
          },
        },
@@ -185,6 +189,18 @@ Source: [`lib/services/compile-config.service.ts:9-170`](../lib/services/compile
      resolve: { extensions: ['.tsx', '.ts', '.jsx', '.js'] },
    }
    ```
+
+   **Polyfills**: `env.mode: 'usage'` auto-injects `core-js@3.38`
+   polyfills per file based on the API usage SWC sees. Targets come
+   from a `browserslist()` call rooted at `cfg.path('src', 'root')`
+   — that resolves the consumer's `.browserslistrc` (or
+   `package.json#browserslist`) regardless of where webpack is invoked
+   from. With no browserslist file, browserslist's own `defaults`
+   query (`> 0.5%, last 2 versions, Firefox ESR, not dead`) applies
+   and the bundle stays modern. Note: SWC's env reads browserslist
+   from `process.cwd()` by default, which is fragile in monorepos —
+   that's why we resolve and pass `targets` explicitly.
+
    `bootstrap` and `foundation-sites` are whitelisted from the
    `node_modules` exclusion so their SCSS mixins / JS helpers can be
    transpiled alongside project code.
