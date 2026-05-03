@@ -1,19 +1,21 @@
-import { Allow, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { z } from 'zod';
 
-export class DirMap {
-  src: string;
-  dist: string;
-}
+export const DirMapSchema = z.object({
+  src: z.string(),
+  dist: z.string(),
+});
 
-export class PathConfig {
-  @Allow()
-  root: DirMap | string = { src: 'assets', dist: 'dist' };
-  @Allow()
-  scripts: DirMap | string = 'scripts';
-  @Allow()
-  styles: DirMap | string = 'styles';
-  @Allow()
-  images: DirMap | string = 'images';
-  @Allow()
-  fonts: DirMap | string = 'fonts';
-}
+export type DirMap = z.infer<typeof DirMapSchema>;
+
+const dirOrString = (def: string | DirMap) =>
+  z.union([DirMapSchema, z.string()]).default(def);
+
+export const PathConfigSchema = z.object({
+  root: dirOrString({ src: 'assets', dist: 'dist' }),
+  scripts: dirOrString('scripts'),
+  styles: dirOrString('styles'),
+  images: dirOrString('images'),
+  fonts: dirOrString('fonts'),
+});
+
+export type PathConfig = z.infer<typeof PathConfigSchema>;

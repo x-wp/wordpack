@@ -1,48 +1,15 @@
-import { Type } from 'class-transformer';
-import {
-  IsBoolean,
-  IsHexColor,
-  IsInstance,
-  IsInt,
-  IsObject,
-  IsOptional,
-  IsPositive,
-  IsString,
-  Min,
-  ValidateIf,
-} from 'class-validator';
+import { z } from 'zod';
 import type { Configuration } from 'webpack';
 import * as path from 'node:path';
 
 export class BundleConfig {
-  @IsString()
-  name!: string;
-
-  @IsString({ each: true })
-  files!: string[];
-
-  @IsBoolean()
-  splitChunks: boolean = true;
-
-  @IsOptional()
-  @IsInstance(RegExp)
-  @Type(() => RegExp)
-  @ValidateIf((o: BundleConfig) => o.splitChunks === true)
-  chunkTest: RegExp = /[\\/]node_modules[\\/]/;
-
-  @Min(10)
-  @IsPositive()
-  @IsInt()
-  @ValidateIf((o: BundleConfig) => o.splitChunks === true)
-  chunkMinSize: number = 5000;
-
-  @IsHexColor()
-  @IsOptional()
+  name: string;
+  files: string[];
+  splitChunks: boolean;
+  chunkTest: RegExp;
+  chunkMinSize: number;
   color?: string;
-
-  @IsObject()
-  @IsOptional()
-  override: Partial<Configuration> = {};
+  override: Partial<Configuration>;
 
   hasStyles(): boolean {
     return this.files.some((f) => f.match(/\.s?css$/i));
@@ -65,3 +32,20 @@ export class BundleConfig {
     );
   }
 }
+
+export const BundleConfigSchema = z
+  .object({
+    name: z.string(),
+    files: z.array(z.string()),
+    splitChunks: z.boolean().default(true),
+    chunkTest: z.instanceof(RegExp).default(/[\\/]node_modules[\\/]/),
+    chunkMinSize: z.number().int().min(10).positive().default(5000),
+    color: z
+      .string()
+      .regex(/^#([0-9a-f]{3}){1,2}$/i, 'must be a hex color')
+      .optional(),
+    override: z.record(z.string(), z.unknown()).default({}),
+  })
+  .transform((data) => Object.assign(new BundleConfig(), data));
+
+export type BundleConfigInterface = z.input<typeof BundleConfigSchema>;

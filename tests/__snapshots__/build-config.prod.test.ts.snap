@@ -47,13 +47,8 @@ exports[`buildConfig — production > matches snapshot 1`] = `
               },
               "jsc": {
                 "parser": {
-                  "decorators": true,
                   "syntax": "typescript",
                   "tsx": true,
-                },
-                "transform": {
-                  "decoratorMetadata": true,
-                  "legacyDecorator": true,
                 },
               },
             },

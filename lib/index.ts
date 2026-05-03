@@ -1,8 +1,7 @@
-import 'reflect-metadata';
-import { WordPackConfigInterface, BundleConfigInterface } from './interfaces';
+import type { WordPackConfigInterface, BundleConfigInterface } from './config';
 import { buildConfig } from './functions';
 
-export {
+export type {
   WordPackConfigInterface as WordPackConfig,
   BundleConfigInterface as BundleConfig,
 };

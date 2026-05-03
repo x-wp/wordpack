@@ -46,11 +46,6 @@ export class CompileConfig {
                   parser: {
                     syntax: 'typescript',
                     tsx: true,
-                    decorators: true,
-                  },
-                  transform: {
-                    legacyDecorator: true,
-                    decoratorMetadata: true,
                   },
                 },
               },

@@ -1,17 +1,18 @@
-import { WordPackConfig, WordPackEnv } from '../config';
+import {
+  WordPackConfig,
+  WordPackConfigSchema,
+  WordPackEnv,
+  WordPackEnvSchema,
+} from '../config';
 import * as path from 'node:path';
 import { existsSync } from 'node:fs';
-import { transformAndValidateSync } from 'class-transformer-validator';
 import { WebpackError } from 'webpack';
-import { instanceToPlain } from 'class-transformer';
+import { z } from 'zod';
 import { require as tsxRequire } from 'tsx/cjs/api';
+
 export class UserConfig {
   static env(webpackEnv: Record<string, string> | WordPackEnv): WordPackEnv {
-    return transformAndValidateSync(WordPackEnv, webpackEnv, {
-      transformer: {
-        excludeExtraneousValues: true,
-      },
-    }) as WordPackEnv;
+    return WordPackEnvSchema.parse(webpackEnv);
   }
 
   static async load(
@@ -68,15 +69,22 @@ export class UserConfig {
       const configOpts = (
         mod && '__esModule' in mod && mod.__esModule ? mod.default : mod
       ) as Record<string, unknown>;
-      const configObj = { ...configOpts, ...instanceToPlain(env) };
+      const configObj = {
+        ...configOpts,
+        basePath: env.basePath,
+        production: env.production,
+        watch: env.watch,
+        WEBPACK_WATCH: env.WEBPACK_WATCH,
+      };
 
-      return transformAndValidateSync(
-        WordPackConfig,
-        configObj,
-      ) as WordPackConfig;
+      return WordPackConfigSchema.parse(configObj);
     } catch (e) {
       const detail =
-        e instanceof Error ? e.stack ?? e.message : JSON.stringify(e, null, 2);
+        e instanceof z.ZodError
+          ? z.prettifyError(e)
+          : e instanceof Error
+            ? e.stack ?? e.message
+            : JSON.stringify(e, null, 2);
       throw new WebpackError(
         `Error parsing configuration file ${cfgPath}:\n${detail}`,
       );

@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import {
   Configuration,
   ExternalItemFunctionData,
@@ -5,18 +6,14 @@ import {
   ExternalItemObjectUnknown,
   ExternalItemValue,
 } from 'webpack';
-import { Transform, Type } from 'class-transformer';
-import {
-  IsEnum,
-  IsNotEmpty,
-  IsObject,
-  IsString,
-  ValidateNested,
-} from 'class-validator';
-import { WordPackEnv } from './wordpack-env';
-import { BundleConfig } from './bundle.config';
-import { DirMap, PathConfig } from './dir.config';
 import { SharpEncodeOptions } from 'image-minimizer-webpack-plugin/types/utils';
+import {
+  WordPackEnv,
+  baseEnvFields,
+  applyEnvLogic,
+} from './wordpack-env';
+import { BundleConfig, BundleConfigSchema } from './bundle.config';
+import { DirMap, PathConfig, PathConfigSchema } from './dir.config';
 
 type ExternalItem =
   | string
@@ -31,73 +28,45 @@ type ExternalItem =
     ) => void)
   | ((data: ExternalItemFunctionData) => Promise<ExternalItemValue>);
 
+type ExternalsType =
+  | string
+  | RegExp
+  | ExternalItem[]
+  | (ExternalItemObjectKnown & ExternalItemObjectUnknown)
+  | ((
+      data: ExternalItemFunctionData,
+      callback: (
+        err?: null | Error,
+        result?: string | boolean | string[] | { [index: string]: any },
+      ) => void,
+    ) => void)
+  | ((data: ExternalItemFunctionData) => Promise<ExternalItemValue>);
+
 type DirType = keyof DirMap;
 
+const SOURCE_MAP_VALUES = [
+  'eval',
+  'eval-cheap-source-map',
+  'eval-cheap-module-source-map',
+  'eval-source-map',
+  'cheap-source-map',
+  'cheap-module-source-map',
+  'source-map',
+] as const;
+
+const stripExt = (v: string) => v.replace('[ext]', '');
+
 export class WordPackConfig extends WordPackEnv {
-  @IsString()
-  @Transform(({ value }) => value.replace('[ext]', ''))
-  imagename: string = '[name]';
-
-  @IsString()
-  @Transform(({ value }) => value.replace('[ext]', ''))
-  fontname: string = '[name]';
-
-  @IsString()
-  @Transform(({ value }) => value.replace('[ext]', ''))
-  filename: string = '[name].[contenthash:6]';
-
-  @IsString()
-  manifest: string = 'assets.json';
-
-  @ValidateNested({ each: true })
-  @Type(() => BundleConfig)
-  bundles!: BundleConfig[];
-
-  @IsNotEmpty()
-  externals:
-    | string
-    | RegExp
-    | ExternalItem[]
-    | (ExternalItemObjectKnown & ExternalItemObjectUnknown)
-    | ((
-        data: ExternalItemFunctionData,
-        callback: (
-          err?: null | Error,
-          result?: string | boolean | string[] | { [index: string]: any },
-        ) => void,
-      ) => void)
-    | ((data: ExternalItemFunctionData) => Promise<ExternalItemValue>) = [
-    {
-      jquery: 'jQuery',
-      underscore: '_',
-      backbone: 'backbone',
-      lodash: '_',
-    },
-  ];
-
-  @IsObject()
-  @ValidateNested()
-  @Type(() => PathConfig)
-  paths: PathConfig = new PathConfig();
-
-  @IsEnum([
-    'eval',
-    'eval-cheap-source-map',
-    'eval-cheap-module-source-map',
-    'eval-source-map',
-    'cheap-source-map',
-    'cheap-module-source-map',
-    'source-map',
-    false,
-  ])
-  sourceMaps: string | false = 'eval-cheap-source-map';
-
-  @IsObject()
-  override: Partial<Configuration> = {};
-
-  @IsObject()
-  imageMin: Partial<SharpEncodeOptions> = {};
-
+  imagename: string;
+  fontname: string;
+  filename: string;
+  manifest: string;
+  bundles: BundleConfig[];
+  externals: ExternalsType;
+  paths: PathConfig;
+  sourceMaps: string | false;
+  override: Partial<Configuration>;
+  imageMin: Partial<SharpEncodeOptions>;
   cfgPath: string = '';
 
   root(which: DirType): string {
@@ -131,7 +100,7 @@ export class WordPackConfig extends WordPackEnv {
       return this.paths[dir] as string;
     }
 
-    return this.paths[dir][which];
+    return (this.paths[dir] as DirMap)[which];
   }
 
   get mode(): 'production' | 'development' {
@@ -146,3 +115,38 @@ export class WordPackConfig extends WordPackEnv {
     return process.env.CI !== undefined;
   }
 }
+
+export const WordPackConfigSchema = z
+  .object({
+    ...baseEnvFields,
+    imagename: z.string().default('[name]').transform(stripExt),
+    fontname: z.string().default('[name]').transform(stripExt),
+    filename: z
+      .string()
+      .default('[name].[contenthash:6]')
+      .transform(stripExt),
+    manifest: z.string().default('assets.json'),
+    bundles: z.array(BundleConfigSchema),
+    externals: z
+      .custom<ExternalsType>((v) => v !== undefined && v !== null, {
+        message: 'externals must not be empty',
+      })
+      .default([
+        {
+          jquery: 'jQuery',
+          underscore: '_',
+          backbone: 'backbone',
+          lodash: '_',
+        },
+      ]),
+    paths: PathConfigSchema.prefault({}),
+    sourceMaps: z
+      .union([z.literal(false), z.enum(SOURCE_MAP_VALUES)])
+      .default('eval-cheap-source-map'),
+    override: z.record(z.string(), z.unknown()).default({}),
+    imageMin: z.record(z.string(), z.unknown()).default({}),
+  })
+  .transform(applyEnvLogic)
+  .transform((data) => Object.assign(new WordPackConfig(), data));
+
+export type WordPackConfigInterface = z.input<typeof WordPackConfigSchema>;

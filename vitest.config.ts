@@ -8,12 +8,7 @@ export default defineConfig({
       jsc: {
         parser: {
           syntax: 'typescript',
-          decorators: true,
           dynamicImport: true,
-        },
-        transform: {
-          legacyDecorator: true,
-          decoratorMetadata: true,
         },
         target: 'es2022',
       },

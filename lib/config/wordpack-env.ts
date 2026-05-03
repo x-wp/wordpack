@@ -1,26 +1,32 @@
-import { Expose, Transform } from 'class-transformer';
-import { IsBoolean, IsOptional, IsString } from 'class-validator';
+import { z } from 'zod';
 import path from 'node:path';
 
+export const baseEnvFields = {
+  basePath: z.string(),
+  production: z.boolean().default(false),
+  watch: z.boolean().default(false),
+  WEBPACK_WATCH: z.boolean().optional(),
+};
+
+type BaseEnvShape = {
+  basePath: string;
+  production: boolean;
+  watch: boolean;
+  WEBPACK_WATCH?: boolean;
+};
+
+export function applyEnvLogic<T extends BaseEnvShape>(o: T): T {
+  return {
+    ...o,
+    basePath: path.posix.resolve(process.cwd(), o.basePath || ''),
+    watch: Boolean(o.WEBPACK_WATCH || o.watch || false),
+  };
+}
+
 export class WordPackEnv {
-  @Expose()
-  @IsString()
-  @Transform(({ value }) => path.posix.resolve(process.cwd(), value || ''))
-  basePath!: string;
-
-  @Expose()
-  @IsBoolean()
-  @IsOptional()
-  @Transform(({ value }) => value || false)
-  production: boolean = false;
-
-  @IsBoolean()
-  @Expose()
-  @Transform(({ value, obj }) => obj.WEBPACK_WATCH || value || false)
-  watch: boolean = false;
-
-  @IsBoolean()
-  @IsOptional()
+  basePath: string;
+  production: boolean;
+  watch: boolean;
   WEBPACK_WATCH?: boolean;
 
   get base(): string {
@@ -35,3 +41,10 @@ export class WordPackEnv {
     return path.posix.resolve(this.base, ...paths);
   }
 }
+
+export const WordPackEnvSchema = z
+  .object(baseEnvFields)
+  .transform(applyEnvLogic)
+  .transform((data) => Object.assign(new WordPackEnv(), data));
+
+export type WordPackEnvInterface = z.input<typeof WordPackEnvSchema>;

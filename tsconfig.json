@@ -12,8 +12,6 @@
     "noLib": false,
     "strictPropertyInitialization": false,
     "exactOptionalPropertyTypes": false,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
     "useUnknownInCatchVariables": false,
     "skipLibCheck": true,
     "target": "ES2021",
