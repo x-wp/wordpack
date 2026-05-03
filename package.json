@@ -27,9 +27,9 @@
     "lint:fix": "eslint lib --ext .ts --fix",
     "format": "prettier --write lib",
     "format:check": "prettier --check lib",
-    "test": "webpack --config test/webpack.config.ts --env basePath=./test",
-    "test:prod": "webpack --config test/webpack.config.ts --env production basePath=./test",
-    "test:watch": "webpack --config test/webpack.config.ts --watch --env basePath=./test"
+    "test": "tsx ./node_modules/webpack/bin/webpack.js --config test/webpack.config.ts --env basePath=./test",
+    "test:prod": "tsx ./node_modules/webpack/bin/webpack.js --config test/webpack.config.ts --env production basePath=./test",
+    "test:watch": "tsx ./node_modules/webpack/bin/webpack.js --config test/webpack.config.ts --watch --env basePath=./test"
   },
   "engines": {
     "node": ">=20"
@@ -65,7 +65,7 @@
     "svgo": "^3.3",
     "swc-loader": "^0.2.7",
     "terser-webpack-plugin": "^5.3.10",
-    "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
     "webpack-assets-manifest": "^5.2.1",
     "webpack-merge": "^6.0",
     "webpack-remove-empty-scripts": "^1.0.4",

@@ -4,6 +4,7 @@ import { existsSync } from 'node:fs';
 import { transformAndValidateSync } from 'class-transformer-validator';
 import { WebpackError } from 'webpack';
 import { instanceToPlain } from 'class-transformer';
+import { require as tsxRequire } from 'tsx/cjs/api';
 export class UserConfig {
   static env(webpackEnv: Record<string, string> | WordPackEnv): WordPackEnv {
     return transformAndValidateSync(WordPackEnv, webpackEnv, {
@@ -60,7 +61,13 @@ export class UserConfig {
     env: WordPackEnv,
   ): Promise<WordPackConfig> {
     try {
-      const configOpts = (await import(cfgPath)).default;
+      const mod = tsxRequire(cfgPath, __filename) as
+        | { default?: Record<string, unknown>; __esModule?: boolean }
+        | Record<string, unknown>
+        | undefined;
+      const configOpts = (
+        mod && '__esModule' in mod && mod.__esModule ? mod.default : mod
+      ) as Record<string, unknown>;
       const configObj = { ...configOpts, ...instanceToPlain(env) };
 
       return transformAndValidateSync(
@@ -69,9 +76,7 @@ export class UserConfig {
       ) as WordPackConfig;
     } catch (e) {
       const detail =
-        e instanceof Error
-          ? e.stack ?? e.message
-          : JSON.stringify(e, null, 2);
+        e instanceof Error ? e.stack ?? e.message : JSON.stringify(e, null, 2);
       throw new WebpackError(
         `Error parsing configuration file ${cfgPath}:\n${detail}`,
       );
