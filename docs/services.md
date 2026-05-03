@@ -43,9 +43,9 @@ Returned slice:
   target: 'web',
   stats: false,
   optimization: { removeEmptyChunks: true },
-  plugins: [new OnlyFriendlyErrorsPlugin({
+  plugins: [new FriendlyErrorsWebpackPlugin({
     clearConsole: false,
-    compilationSuccessInfo: { messages: [], notes: [] },
+    silentSuccess: true,
   })],
   // When cfg.watch:
   watch: true,
@@ -59,8 +59,10 @@ Returned slice:
 
 Static cache: `this.sharedCfg ??= merge(core, watch, prod)` — built once
 per `buildConfig` call, reused across all bundles. That means a single
-`OnlyFriendlyErrorsPlugin` instance is appended to every bundle's plugins
-array after webpack-merge concatenation.
+`FriendlyErrorsWebpackPlugin` instance is appended to every bundle's plugins
+array after webpack-merge concatenation. `silentSuccess: true` mutes the
+per-compile "Compiled successfully" banner so that webpackbar (which
+already shows per-bundle status) is the single source of success output.
 
 ## `ManifestConfig` — shared asset manifest
 
@@ -375,32 +377,14 @@ Colorizer.stringToColor(str, bgColor = '000')
 Used by `EntryConfig.getBarConfig` to pick a webpackbar color when the
 consumer doesn't set `bundle.color`.
 
-## `OnlyFriendlyErrorsPlugin` — silent-success wrapper
-
-Source: [`lib/plugins/only-friendly-errors.plugin.ts`](../lib/plugins/only-friendly-errors.plugin.ts).
-
-```ts
-class OnlyFriendlyErrorsPlugin extends FriendlyErrorsWebpackPlugin {
-  apply(compiler) { super.apply(compiler); }
-  displaySuccess(stats) { /* noop */ }
-}
-```
-
-Keeps the error/warning formatting from `@soda/friendly-errors-webpack-plugin`
-but mutes its per-compile "success" summary, which would otherwise print
-once per bundle in multi-config mode. Registered by `SharedConfig`.
-
-Type shim: [`lib/@types/friendly-errors-webpack-plugin.d.ts`](../lib/@types/friendly-errors-webpack-plugin.d.ts).
-
 ## Ambient module shims
 
-Two upstream packages ship without typings; we declare their shapes inline
+`css-url-relative-plugin` ships without typings; we declare its shape inline
 so the library compiles in strict mode:
 
 | Shim | Package | What it declares |
 |------|---------|------------------|
 | [`lib/@types/css-url-relative-plugin.d.ts`](../lib/@types/css-url-relative-plugin.d.ts) | `css-url-relative-plugin` | `CssUrlRelativePlugin` class with `apply(compiler)` and an options object with `root?: string`. |
-| [`lib/@types/friendly-errors-webpack-plugin.d.ts`](../lib/@types/friendly-errors-webpack-plugin.d.ts) | `@soda/friendly-errors-webpack-plugin` | Constructor options (`clearConsole`, `compilationSuccessInfo`, `onErrors`) plus `apply` and `displaySuccess`. |
 
 `tsconfig.json`'s `typeRoots` entry `"./lib/@types"` is what makes them
 resolvable during compilation.

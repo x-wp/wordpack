@@ -117,7 +117,7 @@ earlier ones. The rationale for the specific order:
 
 | Slot | Service | Why here |
 |------|---------|----------|
-| 1 | `SharedConfig` | Bedrock: `devtool`, `context`, `externals`, `mode`, `target`, `stats`, `OnlyFriendlyErrorsPlugin`. Cached statically across bundles. |
+| 1 | `SharedConfig` | Bedrock: `devtool`, `context`, `externals`, `mode`, `target`, `stats`, `FriendlyErrorsWebpackPlugin` (with `silentSuccess: true`). Cached statically across bundles. |
 | 2 | `ManifestConfig` | Adds the per-bundle `WebpackAssetsManifest` plugin (shared `Assets` object). Separated so it can be toggled by the single `cfg.manifest` flag. |
 | 3 | `EntryConfig` | Sets `name`, `entry`, `output` and the bundle-specific `WebpackBarPlugin`. Must come before `CompileConfig` because `CompileConfig.getCssConfig` uses `bundle.entry` keys to decide the CSS output directory. |
 | 4 | `CompileConfig` | Loaders + `MiniCssExtractPlugin` + `CssUrlRelativePlugin` + `WebpackRemoveEmptyScriptsPlugin`. |
@@ -197,7 +197,7 @@ these in mind:
 - `SharedConfig.sharedCfg` (`shared-config.service.ts:8,10`) — the first
   call builds the shared webpack slice and all subsequent bundles reuse
   it. Because `webpack-merge` concatenates plugin arrays, every bundle
-  ends up with the *same* `OnlyFriendlyErrorsPlugin` *instance* appended
+  ends up with the *same* `FriendlyErrorsWebpackPlugin` *instance* appended
   to its plugins array. Webpack handles that fine, but don't mutate the
   plugin between bundles.
 - `ManifestConfig.asts` (`manifest-config.service.ts:12,28`) — a shared

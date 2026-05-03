@@ -44,7 +44,6 @@ lib/
 ├── config/               ← decorated config classes (WordPackEnv, WordPackConfig, BundleConfig, PathConfig)
 ├── interfaces/           ← user-facing TS interfaces (permissive shapes)
 ├── services/             ← the eight classes that build webpack config slices
-├── plugins/              ← custom webpack plugins (OnlyFriendlyErrorsPlugin)
 └── @types/               ← ambient module shims for untyped upstream packages
 ```
 

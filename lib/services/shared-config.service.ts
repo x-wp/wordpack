@@ -1,8 +1,8 @@
+import FriendlyErrorsWebpackPlugin from '@x-wp/friendly-errors-webpack-plugin';
 import { Configuration } from 'webpack';
 import { merge } from 'webpack-merge';
 
 import { WordPackConfig } from '../config';
-import { OnlyFriendlyErrorsPlugin } from '../plugins';
 
 export class SharedConfig {
   private static sharedCfg: Configuration;
@@ -27,12 +27,9 @@ export class SharedConfig {
         removeEmptyChunks: true,
       },
       plugins: [
-        new OnlyFriendlyErrorsPlugin({
+        new FriendlyErrorsWebpackPlugin({
           clearConsole: false,
-          compilationSuccessInfo: {
-            messages: [],
-            notes: [],
-          },
+          silentSuccess: true,
         }),
       ],
     };

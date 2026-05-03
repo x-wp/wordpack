@@ -12,7 +12,6 @@ Working on the library itself.
 │   ├── config/                   ← decorated config classes
 │   ├── interfaces/               ← user-facing TS interfaces
 │   ├── services/                 ← webpack-config builder classes
-│   ├── plugins/                  ← OnlyFriendlyErrorsPlugin
 │   └── @types/                   ← ambient shims for untyped deps
 ├── dist/                         ← tsc output (outDir); published to npm
 ├── test/                         ← smoke-test harness
@@ -142,7 +141,7 @@ true }` so npm receives provenance metadata.
   `terser-webpack-plugin`, `css-minimizer-webpack-plugin`,
   `image-minimizer-webpack-plugin`, `copy-webpack-plugin`,
   `webpack-remove-empty-scripts`, `css-url-relative-plugin`,
-  `webpack-assets-manifest`, `webpackbar`, `@soda/friendly-errors-webpack-plugin`.
+  `webpack-assets-manifest`, `webpackbar`, `@x-wp/friendly-errors-webpack-plugin`.
 - Validation stack: `class-validator`, `class-transformer`,
   `class-transformer-validator`, `reflect-metadata`.
 - Dynamic config loading: `ts-node`.
