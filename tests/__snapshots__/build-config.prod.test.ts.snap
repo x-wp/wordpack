@@ -200,8 +200,12 @@ exports[`buildConfig — production > matches snapshot 1`] = `
     "optimization": {
       "minimize": true,
       "minimizer": [
-        "[Circular]",
-        "[Circular]",
+        {
+          "__plugin": "ImageMinimizerPlugin",
+        },
+        {
+          "__plugin": "ImageMinimizerPlugin",
+        },
       ],
     },
     "output": {

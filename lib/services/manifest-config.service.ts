@@ -4,40 +4,37 @@ import WebpackAssetsManifest, {
   Options,
 } from 'webpack-assets-manifest';
 import { manifestEntryFormatter } from '../functions/manifest-utils';
-import merge from 'webpack-merge';
 import { WordPackConfig } from '../config';
 
-export class ManifestConfig {
-  private static mfs: Configuration;
-  private static asts: Assets;
-  static build(cfg: WordPackConfig): Configuration {
-    if (!cfg.manifest) {
-      return {};
-    }
-
-    return merge({
-      plugins: [
-        this.getManifestPlugin({
-          output: cfg.manifest,
-        }),
-      ],
-    });
+export function buildManifestConfig(
+  cfg: WordPackConfig,
+  sharedAssets: Assets,
+): Configuration {
+  if (!cfg.manifest) {
+    return {};
   }
 
-  static getManifestPlugin(options: Options = {}): WebpackPluginInstance {
-    this.asts ??= Object.create(null);
+  return {
+    plugins: [
+      getManifestPlugin({
+        output: cfg.manifest,
+        assets: sharedAssets,
+      }),
+    ],
+  };
+}
 
-    const defs: Options = {
-      output: 'assets.json',
-      space: 2,
-      merge: true,
-      assets: this.asts,
-      sortManifest: true,
-      writeToDisk: false,
-      customize: manifestEntryFormatter,
-    };
-    const opts: Options = { ...defs, ...options };
+export function getManifestPlugin(
+  options: Options = {},
+): WebpackPluginInstance {
+  const defs: Options = {
+    output: 'assets.json',
+    space: 2,
+    merge: true,
+    sortManifest: true,
+    writeToDisk: false,
+    customize: manifestEntryFormatter,
+  };
 
-    return new WebpackAssetsManifest(opts);
-  }
+  return new WebpackAssetsManifest({ ...defs, ...options });
 }

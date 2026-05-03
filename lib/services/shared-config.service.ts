@@ -4,77 +4,75 @@ import { merge } from 'webpack-merge';
 
 import { WordPackConfig } from '../config';
 
-export class SharedConfig {
-  private static sharedCfg: Configuration;
-  static build(cfg: WordPackConfig): Configuration {
-    return (this.sharedCfg ??= merge(
-      SharedConfig.getCoreConfig(cfg),
-      SharedConfig.getCacheConfig(cfg),
-      SharedConfig.getWatchConfig(cfg),
-      SharedConfig.getProdConfig(cfg),
-    ));
-  }
-  private static getCoreConfig(cfg: WordPackConfig): Configuration {
-    return {
-      devtool: cfg.sourceMaps,
-      context: cfg.path('src', 'root'),
-      externalsType: 'window',
-      externals: cfg.externals,
-      mode: 'development',
-      target: 'web',
+export function buildSharedConfig(cfg: WordPackConfig): Configuration {
+  return merge(
+    getCoreConfig(cfg),
+    getCacheConfig(cfg),
+    getWatchConfig(cfg),
+    getProdConfig(cfg),
+  );
+}
 
-      stats: false,
-      optimization: {
-        removeEmptyChunks: true,
-      },
-      plugins: [
-        new FriendlyErrorsWebpackPlugin({
-          clearConsole: false,
-          silentSuccess: true,
-        }),
-      ],
-    };
-  }
+function getCoreConfig(cfg: WordPackConfig): Configuration {
+  return {
+    devtool: cfg.sourceMaps,
+    context: cfg.path('src', 'root'),
+    externalsType: 'window',
+    externals: cfg.externals,
+    mode: 'development',
+    target: 'web',
 
-  private static getCacheConfig(cfg: WordPackConfig): Configuration {
-    if (cfg.prod) {
-      return {};
-    }
+    stats: false,
+    optimization: {
+      removeEmptyChunks: true,
+    },
+    plugins: [
+      new FriendlyErrorsWebpackPlugin({
+        clearConsole: false,
+        silentSuccess: true,
+      }),
+    ],
+  };
+}
 
-    return {
-      cache: {
-        type: 'filesystem',
-        buildDependencies: cfg.cfgPath ? { config: [cfg.cfgPath] } : {},
-      },
-    };
+function getCacheConfig(cfg: WordPackConfig): Configuration {
+  if (cfg.prod) {
+    return {};
   }
 
-  private static getWatchConfig(cfg: WordPackConfig): Configuration {
-    if (!cfg.watch) {
-      return {};
-    }
+  return {
+    cache: {
+      type: 'filesystem',
+      buildDependencies: cfg.cfgPath ? { config: [cfg.cfgPath] } : {},
+    },
+  };
+}
 
-    return {
-      watch: true,
-      watchOptions: {
-        ignored: /node_modules/,
-        aggregateTimeout: 600,
-        poll: 1000,
-      },
-    };
+function getWatchConfig(cfg: WordPackConfig): Configuration {
+  if (!cfg.watch) {
+    return {};
   }
 
-  private static getProdConfig(cfg: WordPackConfig): Configuration {
-    if (!cfg.prod) {
-      return {};
-    }
+  return {
+    watch: true,
+    watchOptions: {
+      ignored: /node_modules/,
+      aggregateTimeout: 600,
+      poll: 1000,
+    },
+  };
+}
 
-    return {
-      devtool: false,
-      mode: 'production',
-      optimization: {
-        minimize: true,
-      },
-    };
+function getProdConfig(cfg: WordPackConfig): Configuration {
+  if (!cfg.prod) {
+    return {};
   }
+
+  return {
+    devtool: false,
+    mode: 'production',
+    optimization: {
+      minimize: true,
+    },
+  };
 }

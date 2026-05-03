@@ -1,8 +1,15 @@
 import { Configuration } from 'webpack';
 import { merge } from 'webpack-merge';
 import { mkdirSync, rmSync } from 'node:fs';
-import * as Svc from '../services';
+import { Assets } from 'webpack-assets-manifest';
 import { WordPackEnv } from '../config';
+import { buildAssetConfig } from '../services/asset-config.service';
+import { buildCompileConfig } from '../services/compile-config.service';
+import { buildEntryConfig } from '../services/entry-config.service';
+import { buildManifestConfig } from '../services/manifest-config.service';
+import { buildOptimizeConfig } from '../services/optimize-config.service';
+import { buildSharedConfig } from '../services/shared-config.service';
+import { loadUserConfig, parseUserEnv } from '../services/user-config.service';
 
 export async function buildConfig(
   webpackEnv: Record<string, string> | WordPackEnv,
@@ -10,24 +17,25 @@ export async function buildConfig(
 ): Promise<Configuration[]> {
   try {
     const res: Configuration[] = [];
-    const env = Svc.UserConfig.env(webpackEnv);
-    const cfg = await Svc.UserConfig.load(wpwpConfig, env);
+    const env = parseUserEnv(webpackEnv);
+    const cfg = await loadUserConfig(wpwpConfig, env);
+    const sharedAssets: Assets = Object.create(null);
 
     cfg.bundles.forEach((bundle) =>
       res.push(
         merge(
-          Svc.SharedConfig.build(cfg),
-          Svc.ManifestConfig.build(cfg),
-          Svc.EntryConfig.build(cfg, bundle),
-          Svc.CompileConfig.build(cfg, bundle),
-          Svc.OptimizeConfig.build(cfg, bundle),
+          buildSharedConfig(cfg),
+          buildManifestConfig(cfg, sharedAssets),
+          buildEntryConfig(cfg, bundle),
+          buildCompileConfig(cfg, bundle),
+          buildOptimizeConfig(cfg, bundle),
           cfg.override,
           bundle.override,
         ),
       ),
     );
 
-    res.push(Svc.AssetConfig.build(cfg));
+    res.push(buildAssetConfig(cfg, sharedAssets));
 
     const distDir = cfg.path('dist', 'root');
     rmSync(distDir, { recursive: true, force: true });

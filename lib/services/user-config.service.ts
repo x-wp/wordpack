@@ -10,84 +10,83 @@ import { WebpackError } from 'webpack';
 import { z } from 'zod';
 import { require as tsxRequire } from 'tsx/cjs/api';
 
-export class UserConfig {
-  static env(webpackEnv: Record<string, string> | WordPackEnv): WordPackEnv {
-    return WordPackEnvSchema.parse(webpackEnv);
+export function parseUserEnv(
+  webpackEnv: Record<string, string> | WordPackEnv,
+): WordPackEnv {
+  return WordPackEnvSchema.parse(webpackEnv);
+}
+
+export async function loadUserConfig(
+  cfgPath: string,
+  env: WordPackEnv,
+): Promise<WordPackConfig> {
+  cfgPath = existsSync(path.posix.resolve(env.base, cfgPath))
+    ? path.posix.resolve(env.base, cfgPath)
+    : findFile(env.base, cfgPath);
+
+  const config = await readFile(cfgPath, env);
+  config.cfgPath = cfgPath;
+
+  if (env.production) {
+    config.sourceMaps = false;
   }
 
-  static async load(
-    cfgPath: string,
-    env: WordPackEnv,
-  ): Promise<WordPackConfig> {
-    cfgPath = existsSync(path.posix.resolve(env.base, cfgPath))
-      ? path.posix.resolve(env.base, cfgPath)
-      : UserConfig.findFile(env.base, cfgPath);
+  return config;
+}
 
-    const config = await UserConfig.readFile(cfgPath, env);
-    config.cfgPath = cfgPath;
+function findFile(rootDir: string, cfgPath: string): string {
+  const cfgName = path.posix.basename(cfgPath);
+  const cfgFile = possiblePaths(rootDir, cfgName).find((p) => existsSync(p));
 
-    if (env.production) {
-      config.sourceMaps = false;
-    }
-
-    return config;
+  if (!cfgFile) {
+    throw new WebpackError(`Cannot find configuration file ${cfgName}`);
   }
 
-  private static findFile(rootDir: string, cfgPath: string): string {
-    const cfgName = path.posix.basename(cfgPath);
-    const cfgLocs = this.possiblePaths(rootDir, cfgName);
-    const cfgFile = cfgLocs.find((p) => existsSync(p));
+  return cfgFile;
+}
 
-    if (!cfgFile) {
-      throw new WebpackError(`Cannot find configuration file ${cfgName}`);
-    }
+function possiblePaths(rootDir: string, cfgName: string): string[] {
+  const dirs = [
+    '',
+    'assets',
+    'assets/wordpack',
+    'assets/webpack',
+    'assets/build',
+  ];
 
-    return cfgFile;
-  }
+  return dirs.map((d) => path.posix.resolve(rootDir, d, cfgName));
+}
 
-  private static possiblePaths(rootDir: string, cfgName: string): string[] {
-    const dirs = [
-      '',
-      'assets',
-      'assets/wordpack',
-      'assets/webpack',
-      'assets/build',
-    ];
+async function readFile(
+  cfgPath: string,
+  env: WordPackEnv,
+): Promise<WordPackConfig> {
+  try {
+    const mod = tsxRequire(cfgPath, __filename) as
+      | { default?: Record<string, unknown>; __esModule?: boolean }
+      | Record<string, unknown>
+      | undefined;
+    const configOpts = (
+      mod && '__esModule' in mod && mod.__esModule ? mod.default : mod
+    ) as Record<string, unknown>;
+    const configObj = {
+      ...configOpts,
+      basePath: env.basePath,
+      production: env.production,
+      watch: env.watch,
+      WEBPACK_WATCH: env.WEBPACK_WATCH,
+    };
 
-    return dirs.map((d) => path.posix.resolve(rootDir, d, cfgName));
-  }
-
-  private static async readFile(
-    cfgPath: string,
-    env: WordPackEnv,
-  ): Promise<WordPackConfig> {
-    try {
-      const mod = tsxRequire(cfgPath, __filename) as
-        | { default?: Record<string, unknown>; __esModule?: boolean }
-        | Record<string, unknown>
-        | undefined;
-      const configOpts = (
-        mod && '__esModule' in mod && mod.__esModule ? mod.default : mod
-      ) as Record<string, unknown>;
-      const configObj = {
-        ...configOpts,
-        basePath: env.basePath,
-        production: env.production,
-        watch: env.watch,
-        WEBPACK_WATCH: env.WEBPACK_WATCH,
-      };
-
-      return WordPackConfigSchema.parse(configObj);
-    } catch (e) {
-      const detail =
-        e instanceof z.ZodError
-          ? z.prettifyError(e)
-          : e instanceof Error
-            ? e.stack ?? e.message
-            : JSON.stringify(e, null, 2);
-      throw new WebpackError(
-        `Error parsing configuration file ${cfgPath}:\n${detail}`,
-      );
-    }
+    return WordPackConfigSchema.parse(configObj);
+  } catch (e) {
+    const detail =
+      e instanceof z.ZodError
+        ? z.prettifyError(e)
+        : e instanceof Error
+          ? e.stack ?? e.message
+          : JSON.stringify(e, null, 2);
+    throw new WebpackError(
+      `Error parsing configuration file ${cfgPath}:\n${detail}`,
+    );
   }
 }
