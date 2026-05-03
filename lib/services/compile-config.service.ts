@@ -30,28 +30,24 @@ export class CompileConfig {
       module: {
         rules: [
           {
-            test: /(\.[tj]sx?)$/,
+            test: /\.[tj]sx?$/,
             include: [cfg.path('src', 'scripts')],
             exclude: [/node_modules(?![/|\\](bootstrap|foundation-sites))/],
             use: {
-              loader: 'babel-loader',
+              loader: 'swc-loader',
               options: {
-                presets: [
-                  [
-                    '@babel/preset-env',
-                    {
-                      useBuiltIns: 'entry',
-                      corejs: '3.37',
-                    },
-                  ],
-                  [
-                    '@babel/preset-typescript',
-                    {
-                      onlyRemoveTypeImports: true,
-                    },
-                  ],
-                ],
-                plugins: ['@babel/plugin-transform-class-properties'],
+                jsc: {
+                  parser: {
+                    syntax: 'typescript',
+                    tsx: true,
+                    decorators: true,
+                  },
+                  transform: {
+                    legacyDecorator: true,
+                    decoratorMetadata: true,
+                  },
+                  target: 'es2017',
+                },
               },
             },
           },

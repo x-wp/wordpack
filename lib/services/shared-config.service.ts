@@ -9,6 +9,7 @@ export class SharedConfig {
   static build(cfg: WordPackConfig): Configuration {
     return (this.sharedCfg ??= merge(
       SharedConfig.getCoreConfig(cfg),
+      SharedConfig.getCacheConfig(cfg),
       SharedConfig.getWatchConfig(cfg),
       SharedConfig.getProdConfig(cfg),
     ));
@@ -32,6 +33,19 @@ export class SharedConfig {
           silentSuccess: true,
         }),
       ],
+    };
+  }
+
+  private static getCacheConfig(cfg: WordPackConfig): Configuration {
+    if (cfg.prod) {
+      return {};
+    }
+
+    return {
+      cache: {
+        type: 'filesystem',
+        buildDependencies: cfg.cfgPath ? { config: [cfg.cfgPath] } : {},
+      },
     };
   }
 

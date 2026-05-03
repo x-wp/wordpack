@@ -124,6 +124,7 @@ export class OptimizeConfig {
     return (this.jsMin ??= [
       new TerserPlugin({
         extractComments: false,
+        minify: TerserPlugin.swcMinify,
         terserOptions: {
           format: {
             comments: false,

@@ -98,6 +98,8 @@ export class WordPackConfig extends WordPackEnv {
   @IsObject()
   imageMin: Partial<SharpEncodeOptions> = {};
 
+  cfgPath: string = '';
+
   root(which: DirType): string {
     return this.dir(which, 'root');
   }

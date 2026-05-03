@@ -117,7 +117,7 @@ earlier ones. The rationale for the specific order:
 
 | Slot | Service | Why here |
 |------|---------|----------|
-| 1 | `SharedConfig` | Bedrock: `devtool`, `context`, `externals`, `mode`, `target`, `stats`, `FriendlyErrorsWebpackPlugin` (with `silentSuccess: true`). Cached statically across bundles. |
+| 1 | `SharedConfig` | Bedrock: `devtool`, `context`, `externals`, `mode`, `target`, `stats`, `FriendlyErrorsWebpackPlugin` (with `silentSuccess: true`), and the webpack `cache: { type: 'filesystem' }` slice in dev/watch (keyed off `cfg.cfgPath`). Cached statically across bundles. |
 | 2 | `ManifestConfig` | Adds the per-bundle `WebpackAssetsManifest` plugin (shared `Assets` object). Separated so it can be toggled by the single `cfg.manifest` flag. |
 | 3 | `EntryConfig` | Sets `name`, `entry`, `output` and the bundle-specific `WebpackBarPlugin`. Must come before `CompileConfig` because `CompileConfig.getCssConfig` uses `bundle.entry` keys to decide the CSS output directory. |
 | 4 | `CompileConfig` | Loaders + `MiniCssExtractPlugin` + `CssUrlRelativePlugin` + `WebpackRemoveEmptyScriptsPlugin`. |

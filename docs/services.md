@@ -29,7 +29,7 @@ Key behavior to remember:
 
 ## `SharedConfig` — base webpack settings
 
-Source: [`lib/services/shared-config.service.ts:7-69`](../lib/services/shared-config.service.ts).
+Source: [`lib/services/shared-config.service.ts`](../lib/services/shared-config.service.ts).
 
 Returned slice:
 
@@ -47,6 +47,11 @@ Returned slice:
     clearConsole: false,
     silentSuccess: true,
   })],
+  // When !cfg.prod (dev/watch):
+  cache: {
+    type: 'filesystem',
+    buildDependencies: { config: [cfg.cfgPath] },  // invalidates on wpwp.config.ts change
+  },
   // When cfg.watch:
   watch: true,
   watchOptions: { ignored: /node_modules/, aggregateTimeout: 600, poll: 1000 },
@@ -163,17 +168,17 @@ Source: [`lib/services/compile-config.service.ts:9-170`](../lib/services/compile
    ```ts
    {
      module: { rules: [{
-       test: /(\.[tj]sx?)$/,
+       test: /\.[tj]sx?$/,
        include: [cfg.path('src', 'scripts')],
        exclude: [/node_modules(?![/|\\](bootstrap|foundation-sites))/],
        use: {
-         loader: 'babel-loader',
+         loader: 'swc-loader',
          options: {
-           presets: [
-             ['@babel/preset-env', { useBuiltIns: 'entry', corejs: '3.37' }],
-             ['@babel/preset-typescript', { onlyRemoveTypeImports: true }],
-           ],
-           plugins: ['@babel/plugin-transform-class-properties'],
+           jsc: {
+             parser: { syntax: 'typescript', tsx: true, decorators: true },
+             transform: { legacyDecorator: true, decoratorMetadata: true },
+             target: 'es2017',
+           },
          },
        },
      }]},

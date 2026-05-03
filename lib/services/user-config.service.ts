@@ -22,6 +22,7 @@ export class UserConfig {
       : UserConfig.findFile(env.base, cfgPath);
 
     const config = await UserConfig.readFile(cfgPath, env);
+    config.cfgPath = cfgPath;
 
     if (env.production) {
       config.sourceMaps = false;
