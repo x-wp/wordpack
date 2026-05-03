@@ -39,6 +39,9 @@ jobs:
           node-version: lts/*
       - run: npm clean-install
       - run: npm audit signatures
+      - name: Install test fixture dependencies
+        run: npm clean-install
+        working-directory: test
       - name: Test
         run: npm test
       - name: Build
