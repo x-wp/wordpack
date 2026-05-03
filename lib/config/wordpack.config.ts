@@ -1,46 +1,11 @@
 import { z } from 'zod';
-import {
-  Configuration,
-  ExternalItemFunctionData,
-  ExternalItemObjectKnown,
-  ExternalItemObjectUnknown,
-  ExternalItemValue,
-} from 'webpack';
+import { Configuration } from 'webpack';
 import { SharpEncodeOptions } from 'image-minimizer-webpack-plugin/types/utils';
-import {
-  WordPackEnv,
-  baseEnvFields,
-  applyEnvLogic,
-} from './wordpack-env';
+import { WordPackEnv, baseEnvFields, applyEnvLogic } from './wordpack-env';
 import { BundleConfig, BundleConfigSchema } from './bundle.config';
 import { DirMap, PathConfig, PathConfigSchema } from './dir.config';
 
-type ExternalItem =
-  | string
-  | RegExp
-  | (ExternalItemObjectKnown & ExternalItemObjectUnknown)
-  | ((
-      data: ExternalItemFunctionData,
-      callback: (
-        err?: null | Error,
-        result?: string | boolean | string[] | { [index: string]: any },
-      ) => void,
-    ) => void)
-  | ((data: ExternalItemFunctionData) => Promise<ExternalItemValue>);
-
-type ExternalsType =
-  | string
-  | RegExp
-  | ExternalItem[]
-  | (ExternalItemObjectKnown & ExternalItemObjectUnknown)
-  | ((
-      data: ExternalItemFunctionData,
-      callback: (
-        err?: null | Error,
-        result?: string | boolean | string[] | { [index: string]: any },
-      ) => void,
-    ) => void)
-  | ((data: ExternalItemFunctionData) => Promise<ExternalItemValue>);
+type ExternalsType = Configuration['externals'];
 
 type DirType = keyof DirMap;
 
@@ -116,37 +81,40 @@ export class WordPackConfig extends WordPackEnv {
   }
 }
 
-export const WordPackConfigSchema = z
-  .object({
-    ...baseEnvFields,
-    imagename: z.string().default('[name]').transform(stripExt),
-    fontname: z.string().default('[name]').transform(stripExt),
-    filename: z
-      .string()
-      .default('[name].[contenthash:6]')
-      .transform(stripExt),
-    manifest: z.string().default('assets.json'),
-    bundles: z.array(BundleConfigSchema),
-    externals: z
-      .custom<ExternalsType>((v) => v !== undefined && v !== null, {
-        message: 'externals must not be empty',
-      })
-      .default([
-        {
-          jquery: 'jQuery',
-          underscore: '_',
-          backbone: 'backbone',
-          lodash: '_',
-        },
-      ]),
-    paths: PathConfigSchema.prefault({}),
-    sourceMaps: z
-      .union([z.literal(false), z.enum(SOURCE_MAP_VALUES)])
-      .default('eval-cheap-source-map'),
-    override: z.record(z.string(), z.unknown()).default({}),
-    imageMin: z.record(z.string(), z.unknown()).default({}),
-  })
+// User-facing input shape: this is what `wpwp.config.ts` files must satisfy.
+// Env fields (basePath/production/watch/WEBPACK_WATCH) are NOT here — they are
+// merged onto the parse input by user-config.service.readFile from the webpack
+// env, never by the user.
+const WordPackConfigInputShape = z.object({
+  imagename: z.string().default('[name]').transform(stripExt),
+  fontname: z.string().default('[name]').transform(stripExt),
+  filename: z.string().default('[name].[contenthash:6]').transform(stripExt),
+  manifest: z.string().default('assets.json'),
+  bundles: z.array(BundleConfigSchema),
+  externals: z
+    .custom<ExternalsType>((v) => v !== undefined && v !== null, {
+      message: 'externals must not be empty',
+    })
+    .default([
+      {
+        jquery: 'jQuery',
+        underscore: '_',
+        backbone: 'backbone',
+        lodash: '_',
+      },
+    ]),
+  paths: PathConfigSchema.prefault({}),
+  sourceMaps: z
+    .union([z.literal(false), z.enum(SOURCE_MAP_VALUES)])
+    .default('eval-cheap-source-map'),
+  override: z.record(z.string(), z.unknown()).default({}),
+  imageMin: z.record(z.string(), z.unknown()).default({}),
+});
+
+export type WordPackConfigInterface = z.input<typeof WordPackConfigInputShape>;
+
+export const WordPackConfigSchema = WordPackConfigInputShape.extend(
+  baseEnvFields,
+)
   .transform(applyEnvLogic)
   .transform((data) => Object.assign(new WordPackConfig(), data));
-
-export type WordPackConfigInterface = z.input<typeof WordPackConfigSchema>;
