@@ -4,7 +4,9 @@
     "enabled": true,
     "automerge": true
   },
-  "dependencyDashboard": true,
+  "dependencyDashboard": {
+    "enabled": true
+  },
   "packageRules": [
     {
       "matchDepTypes": ["devDependencies", "action", "packageManager"],
